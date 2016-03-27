@@ -96,7 +96,6 @@ void Del (Queue *Q,infotype *X)
 
 int mv=0,BW=0;
 int isChecked=0;
-int lastRGB;
 
 void steerRight(){
 	motor[leftMotor]  = 15;
@@ -220,6 +219,11 @@ void checkBranch(Queue *Q){
 	BW = 0;
 }
 
+
+int isRGB(int color){
+	return color==red || color==green || color==blue;
+}
+
 task main()
 {
 	Queue Q;
@@ -227,6 +231,7 @@ task main()
 	int colorDetected;
 	int nRed=0,nGreen=0,nBlue=0;
 	int saklarNode = 150000;
+	int lastRGB;
 
 	CreateEmpty(Q);
 	initialMove();
@@ -240,29 +245,30 @@ task main()
 			steerRight();
 			displayTextLine(1, "WHITE | BW=%d", ++BW);
 		}
-		switch(colorDetected){
-		case red:
-			turnBack();
-			displayTextLine(1,"");
-			displayTextLine(2,"RED | %d", ++nRed);
-			lastRGB=red;
-			displayTextLine(4,"lastRGB = Red");
-			break;
-		case green:
-			if(BW>saklarNode && lastRGB!=red) checkBranch(Q);
-			displayTextLine(1,"");
-			displayTextLine(2,"GREEN | %d", ++nGreen);
-			displayTextLine(4,"lastRGB = Green");
-			lastRGB=green;
-			break;
-		case blue:
-			displayTextLine(1,"");
-			displayTextLine(2,"BLUE | %d", ++nBlue);
-			displayTextLine(4,"lastRGB = Blue");
+		if (isRGB(colorDetected)){
+			displayTextLine(6,"lastRGB = %d",lastRGB);
+			switch(colorDetected){
+			case red:
+				turnBack();
+				displayTextLine(1,"");
+				displayTextLine(2,"RED | %d", ++nRed);
+				lastRGB=red;
+				break;
+			case green:
+				if(BW>saklarNode && lastRGB!=red) checkBranch(Q);
+				displayTextLine(1,"");
+				displayTextLine(2,"GREEN | %d", ++nGreen);
+				lastRGB=green;
+				break;
+			case blue:
+				displayTextLine(1,"");
+				displayTextLine(2,"BLUE | %d", ++nBlue);
+				lastRGB=blue;
+			}
+			//lastRGB=colorDetected;
 		}
 		getColorRGB(colorSensor,r,g,b);
 		colorDetected = colorCheck(r,g,b);
-		lastRGB=green;
 	}
 	exitBFS();
 }
